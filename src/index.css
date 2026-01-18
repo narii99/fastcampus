@@ -26,3 +26,201 @@ body {
 .animate-fade-in-up {
   animation: fade-in-up 0.6s ease-out forwards;
 }
+
+/* 말풍선 스타일 */
+.chat-bubble {
+  padding: 20px 24px;
+  border-radius: 16px;
+}
+
+.chat-bubble-name {
+  margin-bottom: 8px;
+}
+
+.chat-icon {
+  width: 48px;
+  height: 48px;
+}
+
+/* 스킬 선택 버튼 */
+.skill-btn {
+  padding: 16px 20px;
+  border-radius: 12px;
+}
+
+/* 목표 선택 버튼 */
+.goal-btn {
+  padding: 20px 24px;
+  border-radius: 16px;
+}
+
+.goal-btn-title {
+  margin-bottom: 8px;
+}
+
+/* 완료 버튼 */
+.next-btn {
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+}
+
+.next-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .chat-bubble {
+    padding: 16px 18px;
+    border-radius: 14px;
+  }
+
+  .chat-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .skill-btn {
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+
+  .goal-btn {
+    padding: 16px 18px;
+    border-radius: 14px;
+  }
+
+  .goal-btn-title {
+    font-size: 16px;
+  }
+
+  .next-btn {
+    padding: 12px 28px;
+    font-size: 14px;
+  }
+
+  .skill-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .goal-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .chat-container {
+    max-width: 100% !important;
+    padding: 0 16px;
+  }
+
+  .section-content {
+    padding: 0 16px;
+  }
+
+  .roadmap-card {
+    padding: 20px;
+  }
+
+  .roadmap-title {
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  .roadmap-step {
+    padding: 12px 0;
+  }
+}
+
+/* 로드맵 결과 카드 */
+.roadmap-card {
+  padding: 28px 32px;
+  border-radius: 20px;
+}
+
+.roadmap-title {
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.roadmap-steps {
+  padding: 4px 0;
+}
+
+.roadmap-step {
+  padding: 14px 0;
+}
+
+.roadmap-step-content {
+  padding-top: 2px;
+}
+
+/* 맞춤강의 추천 버튼 */
+.course-btn {
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.course-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+}
+
+@media (max-width: 768px) {
+  .course-btn {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+}
+
+/* 하단 스텝 인디케이터 */
+.step-indicator {
+  padding: 14px 28px;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.step-item {
+  padding: 4px 8px;
+}
+
+.step-arrow {
+  padding: 4px 0;
+}
+
+@media (max-width: 768px) {
+  .step-indicator {
+    padding: 12px 20px;
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .step-item {
+    padding: 2px 4px;
+  }
+
+  .step-arrow {
+    padding: 2px 0;
+  }
+}

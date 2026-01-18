@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import { Terminal, Brain, Target, Sparkles, ChevronDown, Bot, User, Check, Loader2 } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Brain, Sparkles, Bot, Check, Loader2 } from 'lucide-react';
 
 // --- 유틸리티 및 상수 ---
 const COLOR_BG = '#0b0c15'; 
@@ -59,9 +59,13 @@ const generateGeminiRoadmap = async (skills, goal) => {
 export default function AiCareerRoadmap() {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
+  const section1Ref = useRef(null);
+  const section2Ref = useRef(null);
+  const section3Ref = useRef(null);
+  const section4Ref = useRef(null);
   const [activeScene, setActiveScene] = useState(0);
   const [isGsapLoaded, setIsGsapLoaded] = useState(false);
-  
+
   // 사용자 선택 상태
   const [mySkills, setMySkills] = useState([]);
   const [targetGoal, setTargetGoal] = useState("");
@@ -71,6 +75,24 @@ export default function AiCareerRoadmap() {
   // 선택 가능한 옵션들
   const skillOptions = ["JavaScript", "React", "Python", "Java", "HTML/CSS", "SQL"];
   const goalOptions = ["Frontend Dev", "Backend Dev", "AI Engineer", "Data Scientist"];
+
+  // 스크롤 이동 함수
+  const scrollToSection = (sectionRef) => {
+    if (sectionRef.current) {
+      sectionRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // 맞춤강의 링크
+  const getCourseLink = (goal) => {
+    const links = {
+      "Frontend Dev": "https://fastcampus.co.kr/biz_online_devcursorai",
+      "Backend Dev": "https://fastcampus.co.kr/dev_online_devmcp",
+      "AI Engineer": "https://fastcampus.co.kr/dev_online_aiagent",
+      "Data Scientist": "https://fastcampus.co.kr/data_online_awspipeline"
+    };
+    return links[goal] || "";
+  };
 
   // 데이터 모델 (Ref로 관리하여 애니메이션 루프 성능 최적화)
   const nodesRef = useRef([
@@ -258,8 +280,13 @@ export default function AiCareerRoadmap() {
         let targetAlpha = node.alpha;
 
         if (node.type === 'goal') {
-          targetAlpha = p > 0.15 ? Math.min((p - 0.15) * 5, 1) : 0;
-          if(node.label === 'Goal' && targetGoal) node.label = targetGoal;
+          // targetGoal이 선택되면 바로 표시
+          if (targetGoal) {
+            targetAlpha = 1;
+            node.label = targetGoal;
+          } else {
+            targetAlpha = p > 0.15 ? Math.min((p - 0.15) * 5, 1) : 0;
+          }
         }
         
         if (node.id === 'me' && p > 0.2) {
@@ -318,7 +345,12 @@ export default function AiCareerRoadmap() {
           let isDashed = false;
 
           if (link.style === 'analysis') {
-            linkAlpha = (p > 0.4 && p < 0.7) ? 0.3 : 0;
+            // targetGoal이 선택되면 바로 연결선 표시
+            if (targetGoal) {
+              linkAlpha = 0.5;
+            } else {
+              linkAlpha = (p > 0.4 && p < 0.7) ? 0.3 : 0;
+            }
             isDashed = true;
           }
           if (link.style === 'dashed') {
@@ -413,21 +445,22 @@ export default function AiCareerRoadmap() {
       <div ref={containerRef} className="relative z-10 w-full">
         
         {/* 섹션 1: 스킬 선택 */}
-        <Section sceneIndex={0} activeScene={activeScene}>
-            <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
-                <ChatBubble 
-                  icon={<Bot size={24} className="text-blue-400" />} 
+        <section ref={section1Ref} className="h-screen flex items-center justify-center relative px-4">
+          <div className={`section-content transition-all duration-700 transform w-full flex justify-center ${activeScene === 0 ? 'opacity-100 translate-y-0 filter-none' : 'opacity-0 translate-y-10 blur-sm pointer-events-none'}`}>
+            <div className="flex flex-col items-center gap-6 max-w-2xl w-full chat-container">
+                <ChatBubble
+                  icon={<Bot size={24} className="text-blue-400" />}
                   name="AI Coach"
                   message="안녕하세요! 현재 보유하고 계신 기술 스택을 선택해주세요."
                 />
-                <div className="grid grid-cols-3 gap-3 w-full animate-fade-in-up">
+                <div className="skill-grid grid grid-cols-3 gap-4 w-full animate-fade-in-up">
                     {skillOptions.map(skill => (
-                        <button 
+                        <button
                             key={skill}
                             onClick={() => toggleSkill(skill)}
-                            className={`p-4 rounded-xl border flex items-center justify-between transition-all ${
-                                mySkills.includes(skill) 
-                                ? 'bg-blue-600/30 border-blue-500 text-white shadow-lg shadow-blue-500/20' 
+                            className={`skill-btn border flex items-center justify-between transition-all ${
+                                mySkills.includes(skill)
+                                ? 'bg-blue-600/30 border-blue-500 text-white shadow-lg shadow-blue-500/20'
                                 : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:bg-slate-800'
                             }`}
                         >
@@ -436,56 +469,70 @@ export default function AiCareerRoadmap() {
                         </button>
                     ))}
                 </div>
-                <div className="mt-8 flex justify-center animate-bounce opacity-50"><ChevronDown /></div>
+                {mySkills.length > 0 && (
+                  <button
+                    onClick={() => scrollToSection(section2Ref)}
+                    className="next-btn mt-4 animate-fade-in-up"
+                  >
+                    다음 단계로
+                  </button>
+                )}
             </div>
-        </Section>
+          </div>
+        </section>
 
         {/* 섹션 2: 목표 선택 */}
-        <Section sceneIndex={1} activeScene={activeScene}>
-            <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
-                <ChatBubble 
-                    icon={<Bot size={24} className="text-blue-400" />} 
+        <section ref={section2Ref} className="h-screen flex items-center justify-center relative px-4">
+          <div className={`section-content transition-all duration-700 transform w-full flex justify-center ${activeScene === 1 ? 'opacity-100 translate-y-0 filter-none' : 'opacity-0 translate-y-10 blur-sm pointer-events-none'}`}>
+            <div className="flex flex-col items-center gap-6 max-w-2xl w-full chat-container">
+                <ChatBubble
+                    icon={<Bot size={24} className="text-blue-400" />}
                     name="AI Coach"
                     message="멋진 스킬셋이네요! 이제 목표로 하는 커리어를 선택해주세요."
                 />
-                <div className="grid grid-cols-2 gap-4 w-full">
+                <div className="goal-grid grid grid-cols-2 gap-5 w-full">
                     {goalOptions.map(goal => (
-                        <button 
+                        <button
                             key={goal}
                             onClick={() => handleGoalSelect(goal)}
-                            className={`p-6 rounded-xl border text-left transition-all ${
-                                targetGoal === goal 
-                                ? 'bg-red-600/30 border-red-500 text-white shadow-lg shadow-red-500/20' 
+                            className={`goal-btn border text-left transition-all ${
+                                targetGoal === goal
+                                ? 'bg-red-600/30 border-red-500 text-white shadow-lg shadow-red-500/20'
                                 : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:bg-slate-800'
                             }`}
                         >
-                            <div className="font-bold text-lg mb-1">{goal}</div>
-                            <div className="text-xs opacity-70">미래의 나의 모습</div>
+                            <div className="goal-btn-title font-bold text-lg">{goal}</div>
+                            <div className="text-sm opacity-70">미래의 나의 모습</div>
                         </button>
                     ))}
                 </div>
                 {targetGoal && (
-                    <div className="text-center mt-4 text-emerald-400 font-bold animate-pulse">
-                        스크롤을 내려 AI 분석을 시작하세요 ↓
-                    </div>
+                  <button
+                    onClick={() => scrollToSection(section3Ref)}
+                    className="next-btn mt-4 animate-fade-in-up"
+                  >
+                    AI 분석 시작하기
+                  </button>
                 )}
             </div>
-        </Section>
+          </div>
+        </section>
 
         {/* 섹션 3: Gemini 분석 */}
-        <Section sceneIndex={2} activeScene={activeScene}>
-            <div className="flex flex-col items-center gap-6">
-                <ChatBubble 
-                  icon={<Brain size={24} className="text-purple-400 animate-pulse" />} 
+        <section ref={section3Ref} className="h-screen flex items-center justify-center relative px-4">
+          <div className={`section-content transition-all duration-700 transform w-full flex justify-center ${activeScene === 2 ? 'opacity-100 translate-y-0 filter-none' : 'opacity-0 translate-y-10 blur-sm pointer-events-none'}`}>
+            <div className="flex flex-col items-center gap-6 chat-container">
+                <ChatBubble
+                  icon={<Brain size={24} className="text-purple-400 animate-pulse" />}
                   name="Gemini AI"
                   message={isLoading ? "Gemini가 당신의 스킬과 목표를 분석하여 최적의 커리큘럼을 생성 중입니다..." : aiData ? "분석이 완료되었습니다! 아래에서 로드맵을 확인하세요." : "분석을 시작하려면 버튼을 눌러주세요."}
                 />
-                
+
                 {!aiData && !isLoading && (
-                    <button 
+                    <button
                         onClick={startAnalysis}
                         disabled={!targetGoal || mySkills.length === 0}
-                        className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full font-bold text-lg shadow-xl hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="next-btn"
                     >
                         AI 로드맵 생성하기
                     </button>
@@ -497,55 +544,73 @@ export default function AiCareerRoadmap() {
                         <span className="text-sm font-mono">GENERATING CURRICULUM...</span>
                     </div>
                 )}
+
+                {aiData && (
+                  <button
+                    onClick={() => scrollToSection(section4Ref)}
+                    className="next-btn mt-4 animate-fade-in-up"
+                  >
+                    결과 확인하기
+                  </button>
+                )}
             </div>
-        </Section>
+          </div>
+        </section>
 
         {/* 섹션 4: 결과 */}
-        <Section sceneIndex={3} activeScene={activeScene}>
-             <div className="flex flex-col items-center gap-6 max-w-2xl w-full">
-                <ChatBubble 
-                  icon={<Sparkles size={24} className="text-yellow-400" />} 
+        <section ref={section4Ref} className="h-screen flex items-center justify-center relative px-4">
+          <div className={`section-content transition-all duration-700 transform w-full flex justify-center ${activeScene === 3 ? 'opacity-100 translate-y-0 filter-none' : 'opacity-0 translate-y-10 blur-sm pointer-events-none'}`}>
+             <div className="flex flex-col items-center gap-6 max-w-2xl w-full chat-container">
+                <ChatBubble
+                  icon={<Sparkles size={24} className="text-yellow-400" />}
                   name="AI Coach"
                   message={aiData?.message || "로드맵을 확인해보세요!"}
                   highlight
                 />
-                
+
                 {/* 텍스트 결과 카드 */}
                 {aiData && (
-                    <div className="w-full bg-slate-900/80 backdrop-blur-md border border-slate-700 rounded-2xl p-6 shadow-2xl">
-                        <h3 className="text-xl font-bold text-yellow-400 mb-4 border-b border-slate-700 pb-2">
-                           🚀 {targetGoal} 로드맵
+                    <div className="roadmap-card w-full bg-slate-900/80 backdrop-blur-md border border-slate-700 shadow-2xl">
+                        <h3 className="roadmap-title text-xl font-bold text-yellow-400 border-b border-slate-700">
+                           {targetGoal} 로드맵
                         </h3>
-                        <div className="space-y-4">
+                        <div className="roadmap-steps space-y-4">
                             {aiData.steps.map((step, idx) => (
-                                <div key={idx} className="flex gap-4">
-                                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center font-bold text-slate-300">
+                                <div key={idx} className="roadmap-step flex gap-4">
+                                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center font-bold text-slate-300">
                                         {idx + 1}
                                     </div>
-                                    <div>
+                                    <div className="roadmap-step-content">
                                         <div className="font-bold text-white">{step.short_title}</div>
                                         <div className="text-sm text-slate-400">{step.description}</div>
                                     </div>
                                 </div>
                             ))}
                         </div>
+                        <button
+                          onClick={() => window.open(getCourseLink(targetGoal), '_blank')}
+                          className="course-btn w-full mt-6"
+                        >
+                          맞춤강의 추천
+                        </button>
                     </div>
                 )}
-                
-                <div className="h-20"></div> {/* 하단 여백 */}
+
+                <div className="h-20"></div>
              </div>
-        </Section>
+          </div>
+        </section>
 
         <div className="h-[50vh]"></div>
       </div>
       
       {/* 인디케이터 */}
       <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
-        <div className="bg-slate-900/80 backdrop-blur-md px-6 py-2 rounded-full border border-slate-700 text-slate-400 text-sm flex gap-4">
+        <div className="step-indicator bg-slate-900/80 backdrop-blur-md rounded-full border border-slate-700 text-slate-400 flex">
            {['Skills', 'Goal', 'Analyze', 'Result'].map((step, idx) => (
                <React.Fragment key={idx}>
-                   <span className={activeScene >= idx ? "text-blue-400 font-bold transition-colors" : "transition-colors"}>{step}</span>
-                   {idx < 3 && <span className="text-slate-600">→</span>}
+                   <span className={`step-item ${activeScene >= idx ? "text-blue-400 font-bold" : ""} transition-colors`}>{step}</span>
+                   {idx < 3 && <span className="step-arrow text-slate-600">→</span>}
                </React.Fragment>
            ))}
         </div>
@@ -554,31 +619,20 @@ export default function AiCareerRoadmap() {
   );
 }
 
-// 섹션 래퍼 컴포넌트
-function Section({ children, sceneIndex, activeScene }) {
-    return (
-        <section className="h-screen flex items-center justify-center relative px-4">
-          <div className={`transition-all duration-700 transform w-full flex justify-center ${activeScene === sceneIndex ? 'opacity-100 translate-y-0 filter-none' : 'opacity-0 translate-y-10 blur-sm pointer-events-none'}`}>
-            {children}
-          </div>
-        </section>
-    );
-}
-
 function ChatBubble({ icon, name, message, isUser = false, highlight = false }) {
   return (
     <div className={`flex gap-4 items-start max-w-md w-full ${isUser ? 'flex-row-reverse text-right' : ''}`}>
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${isUser ? 'bg-emerald-900/50' : 'bg-slate-800'}`}>
+      <div className={`chat-icon rounded-full flex items-center justify-center flex-shrink-0 ${isUser ? 'bg-emerald-900/50' : 'bg-slate-800'}`}>
         {icon}
       </div>
-      <div className={`p-4 rounded-2xl border backdrop-blur-sm shadow-xl w-full ${
-        highlight 
-        ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-yellow-500/50' 
-        : isUser 
-          ? 'bg-emerald-900/30 border-emerald-700/50' 
+      <div className={`chat-bubble border backdrop-blur-sm shadow-xl w-full ${
+        highlight
+        ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-yellow-500/50'
+        : isUser
+          ? 'bg-emerald-900/30 border-emerald-700/50'
           : 'bg-slate-900/60 border-slate-700'
       }`}>
-        <div className={`text-xs font-bold mb-1 ${isUser ? 'text-emerald-400' : 'text-slate-400'}`}>{name}</div>
+        <div className={`chat-bubble-name text-xs font-bold ${isUser ? 'text-emerald-400' : 'text-slate-400'}`}>{name}</div>
         <p className="text-slate-200 leading-relaxed text-base">{message}</p>
       </div>
     </div>
